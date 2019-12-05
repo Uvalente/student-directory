@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'csv'
 
 @students = []
 
@@ -47,7 +48,7 @@ def print_menu
   puts '2. Show the students'
   puts '3. Save the list to a file'
   puts '4. Load the list from students.csv'
-  puts '9. Exit'
+  puts "9. Exit #{$0}"
 end
 
 def show_students
@@ -91,21 +92,18 @@ def save_students
   puts 'Insert file name to use'
   filename = STDIN.gets.chomp
   filename = 'students.csv' if filename.empty?
-  File.open(filename, 'w') do |file|
+  CSV.open(filename, 'w') do |csv|
     @students.each do |student|
-      student_data = [student[:name], student[:cohort]]
-      csv_line = student_data.join(',')
-      file.puts csv_line
+      csv << [student[:name], student[:cohort]]
     end
   end
 end
 
 def load_students(filename)
-  File.open(filename, 'r') do |file|
-    file.readlines.each do |line|
-      @name, @cohort = line.chomp.split(',')
-      add_students
-    end
+  filename = 'students.csv' if filename.empty?
+  CSV.foreach(filename) do |row|
+    @name, @cohort = row
+    add_students
   end
 end
 
@@ -125,7 +123,7 @@ end
 
 def load_students_file
   return unless File.exist?('students.csv')
-  
+
   load_students('students.csv')
   puts "Loaded automatically #{@students.size} students from students.csv"
 end
